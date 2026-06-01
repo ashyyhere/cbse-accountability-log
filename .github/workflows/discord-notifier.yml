@@ -23,13 +23,15 @@ jobs:
         env:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           EVENT_NAME: ${{ github.event_name }}
+          EVENT_PATH: ${{ github.event_path }}
+          EVENT_ACTION: ${{ github.event.action }}
           ACTOR: ${{ github.actor }}
           REPO_NAME: ${{ github.repository }}
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
           set -euo pipefail
 
-          EVENT_PATH="${GITHUB_EVENT_PATH:-}"
+          EVENT_PATH="${EVENT_PATH:-${GITHUB_EVENT_PATH:-}}"
           if [ -z "$WEBHOOK_URL" ]; then
             echo "Error: DISCORD_WEBHOOK_URL secret is not set."
             exit 1
@@ -44,7 +46,7 @@ jobs:
           if [ -z "${EVENT_PATH:-}" ] || [ ! -f "$EVENT_PATH" ]; then
             echo "Warning: EVENT_PATH is unavailable or missing ($EVENT_PATH)."
             if [ "$EVENT_NAME" = "watch" ]; then
-              WATCH_ACTION="${{ github.event.action }}"
+              WATCH_ACTION="${EVENT_ACTION:-unknown}"
               EVENT_TITLE="⭐ [$REPO_NAME] Star Event"
               EVENT_DESC="**Actor:** \\`$ACTOR\\`\n**Action:** \\`$WATCH_ACTION\\`"
               EVENT_COLOR=16766720
