@@ -1,0 +1,129 @@
+name: Discord Repository Notifier
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    types: [opened, reopened, closed, edited, labeled, unlabeled, synchronized]
+  fork:
+  watch:
+  issues:
+    types: [opened, reopened, closed, edited]
+  release:
+    types: [published, created]
+  workflow_dispatch:
+
+jobs:
+  notify:
+    name: Send Discord notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord notification
+        shell: bash
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_PATH: ${{ github.event_path }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "ERROR: DISCORD_WEBHOOK_URL secret is not configured."
+            exit 1
+          fi
+          python - <<'PY'
+import json
+import os
+import urllib.request
+
+webhook = os.environ["WEBHOOK_URL"]
+event_name = os.environ["EVENT_NAME"]
+repo = os.environ["REPO"]
+actor = os.environ["ACTOR"]
+sha = os.environ["SHA"]
+run_url = os.environ["RUN_URL"]
+
+with open(os.environ["EVENT_PATH"], "r", encoding="utf-8") as f:
+    payload = json.load(f)
+
+if event_name == "push":
+    ref = os.environ.get("REF_NAME", "")
+    head = payload.get("head_commit", {})
+    message = head.get("message", "").splitlines()[0]
+    compare = payload.get("compare", "")
+    title = f"[{repo}] Push to {ref}"
+    description = f"**{actor}** pushed [{sha[:7]}](https://github.com/{repo}/commit/{sha})"
+    fields = []
+    if message:
+        fields.append({"name": "Message", "value": message, "inline": False})
+    if compare:
+        fields.append({"name": "Compare", "value": compare, "inline": False})
+
+elif event_name == "pull_request":
+    action = payload.get("action", "")
+    pr = payload.get("pull_request", {})
+    number = pr.get("number")
+    title = f"[{repo}] PR {action}: #{number}"
+    description = f"**{actor}** {action} pull request [#{number}](https://github.com/{repo}/pull/{number})"
+    fields = [
+        {"name": "Title", "value": pr.get("title", ""), "inline": False},
+        {"name": "State", "value": pr.get("state", ""), "inline": True},
+        {"name": "Merged", "value": str(pr.get("merged", False)), "inline": True},
+    ]
+
+elif event_name == "fork":
+    forkee = payload.get("forkee", {})
+    title = f"[{repo}] Fork"
+    description = f"**{actor}** forked the repository. <{forkee.get('html_url')}>"
+    fields = []
+
+elif event_name == "watch":
+    action = payload.get("action", "")
+    title = f"[{repo}] Star Event"
+    description = f"**{actor}** {action} the repository."
+    fields = []
+
+elif event_name == "issues":
+    action = payload.get("action", "")
+    issue = payload.get("issue", {})
+    number = issue.get("number")
+    title = f"[{repo}] Issue {action}: #{number}"
+    description = f"**{actor}** {action} issue [#{number}](https://github.com/{repo}/issues/{number})"
+    fields = [
+        {"name": "State", "value": issue.get("state", ""), "inline": True},
+    ]
+
+elif event_name == "release":
+    action = payload.get("action", "")
+    release = payload.get("release", {})
+    tag = release.get("tag_name", "")
+    title = f"[{repo}] Release {action}: {tag}"
+    description = f"**{actor}** {action} release [{tag}](https://github.com/{repo}/releases/tag/{tag})"
+    fields = []
+
+else:
+    title = f"[{repo}] {event_name} event"
+    description = f"**{actor}** triggered `{event_name}`."
+    fields = []
+
+if run_url:
+    fields.append({"name": "Workflow Run", "value": run_url, "inline": False})
+
+embed = {
+    "title": title,
+    "description": description,
+    "color": 7506394,
+    "fields": fields,
+}
+
+data = {"embeds": [embed]}
+request = urllib.request.Request(
+    webhook,
+    data=json.dumps(data).encode("utf-8"),
+    headers={"Content-Type": "application/json"},
+)
+urllib.request.urlopen(request)
+PY
