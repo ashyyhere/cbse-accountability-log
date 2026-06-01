@@ -61,7 +61,6 @@ const resultIssues = [
     severity: "High",
     icon: Eye,
     summary: "Reports describe answer scripts where handwriting, diagrams, page edges, or continuation sheets are difficult to inspect because of scan quality.",
-    evidence: "Add X post links, anonymized screenshots, subject/date metadata, and scanner details before publishing case-specific claims.",       
   },
   {
     title: "Wrong or Inconsistent Checking",
@@ -413,10 +412,12 @@ function ResultsIssues() {
               </div>
               <h3 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100">{issue.title}</h3>       
               <p className="mt-6 text-sm leading-loose text-slate-400">{issue.summary}</p>
-              <div className="mt-8 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 text-[10px] font-medium leading-relaxed tracking-wide text-slate-400">
-                <span className="block text-slate-300 dark:text-slate-600 uppercase mb-2">Requirements</span>
-                {issue.evidence}
-              </div>
+              {issue.evidence && (
+                <div className="mt-8 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 text-[10px] font-medium leading-relaxed tracking-wide text-slate-400">
+                  <span className="block text-slate-300 dark:text-slate-600 uppercase mb-2">Requirements</span>
+                  {issue.evidence}
+                </div>
+              )}
             </article>
           );
         })}
