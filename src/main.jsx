@@ -218,7 +218,7 @@ const goats = [
     profile: "https://x.com/thetirthparmar",
     image: "/assets/tirth.jpg",
     role: "Security collaborator",
-    contribution: "Credited in Sidharthâ€™s technical write-up as collaborating with Nisarga on deeper OnMark portal testing. Public mirrors also show his posts being cited in the CBSE cybersecurity discussion.",
+    contribution: "Credited in Sidharth's technical write-up as collaborating with Nisarga on deeper OnMark portal testing. Public mirrors also show his posts being cited in the CBSE cybersecurity discussion.",
     sources: [
       ["Sidharth technical write-up", "https://sidharthify.tech/blogs/blog-31-05-26/"],
       ["LinkedIn profile", "https://in.linkedin.com/in/thetirthparmar"],
