@@ -210,7 +210,7 @@ const goats = [
     contribution: "Authored a detailed technical write-up connecting the broader OnMark portal issues, crediting Nisarga, Sarthak, and Tirth, and documenting alleged weak credentials, outdated frontend dependencies, and disclosure activity in a public narrative.",
     sources: [
       ["CBSE OnMark blog", "https://sidharthify.tech/blogs/blog-31-05-26/"],
-      ["Personal site", "https://sidharthify.me/"],
+      ["Personal site", "https://sidharthify.tech/"],
       ["Breathe OSS profile", "https://breatheoss.app/"],
     ],
   },
