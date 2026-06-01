@@ -68,7 +68,6 @@ const resultIssues = [
     severity: "High",
     icon: Scale,
     summary: "Students and reviewers allege marking inconsistencies, missed steps, unchecked sections, or score mismatches between visible work and awarded marks.",
-    evidence: "Add redacted answer-sheet samples, re-evaluation notes, and comparison tables to make each case auditable.",
   },
   {
     title: "Site Vulnerabilities",
@@ -76,7 +75,6 @@ const resultIssues = [
     severity: "Critical",
     icon: Bug,
     summary: "Community reports reference suspected weaknesses in authentication, access control, session handling, data exposure, or evaluator workflows.",
-    evidence: "Use responsible-disclosure summaries, timelines, proof-of-fix notes, and non-sensitive reproduction details.",
   },
   {
     title: "Missing Pages or Bad Page Order",
@@ -84,7 +82,6 @@ const resultIssues = [
     severity: "Medium",
     icon: FileSearch,
     summary: "Some issue reports involve incomplete scans, duplicate pages, page-order confusion, or mismatched metadata during digital evaluation.",
-    evidence: "Attach anonymized page lists and evidence chains showing when the issue appeared and how it was escalated.",
   },
 ];
 
