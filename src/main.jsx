@@ -288,7 +288,7 @@ function SiteHeader({ route, isDark, toggleDark }) {
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#7dbefa]/10 p-1.5 transition-colors group-hover:bg-[#7dbefa]/20">      
               <img className="h-full w-full object-contain opacity-50" src="/assets/cbse-logo.png" alt="CBSE" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-[0.3em] text-[#7dbefa]">Accountability Log</span>
+            <span className="font-display text-xs font-bold uppercase tracking-[0.3em] text-[#7dbefa]">Accountability Log</span>
           </a>
           <button 
             onClick={toggleDark} 
@@ -335,9 +335,9 @@ function Hero() {
           <span>Public Interest Audit</span>
         </div>
         
-        <h1 className="text-4xl font-extralight tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl md:text-7xl lg:leading-[1.1]">
+        <h1 className="font-display text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl md:text-7xl lg:leading-[1.1]">
           Open records for <br/>
-          <span className="font-medium italic text-[#7dbefa]">digital accountability</span>
+          <span className="font-display font-bold italic text-[#7dbefa]">digital accountability</span>
         </h1>
         
         <p className="mx-auto mt-12 max-w-xl text-sm leading-loose text-slate-400 sm:text-base">
@@ -371,7 +371,7 @@ function IssueOverview() {
     <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
       <div className="mb-16 text-center md:mb-24">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Observation Pillars</p>
-        <h2 className="mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Tracking Systemic Risk</h2>
+        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Tracking Systemic Risk</h2>
       </div>
       <div className="grid gap-x-12 gap-y-16 sm:grid-cols-2 md:gap-y-20 lg:grid-cols-4">
         {issueCards.map((card) => {
@@ -379,7 +379,7 @@ function IssueOverview() {
           return (
             <article key={card.title} className="group">
               <Icon size={20} className={`${card.color} mb-6 opacity-40 transition-opacity group-hover:opacity-100 md:mb-8`} />
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">
+              <h3 className="font-display text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">
                 {card.title === "Security & Vulnerabilities" ? <span className="text-[#7dbefa]">{card.title}</span> : card.title}
               </h3>
               <p className="mt-4 text-xs leading-relaxed text-slate-400">{card.description}</p>
@@ -396,7 +396,7 @@ function ResultsIssues() {
     <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
       <div className="mb-16 md:mb-24">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Field Evidence</p>       
-        <h2 className="mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Evaluation Quality Reports</h2>
+        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Evaluation Quality Reports</h2>
       </div>
       <div className="grid gap-8 md:grid-cols-2 md:gap-12">
         {resultIssues.map((issue) => {
@@ -407,7 +407,7 @@ function ResultsIssues() {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300 dark:text-slate-600">{issue.type}</p>  
                 <Icon size={18} className="text-[#7dbefa]/30" />
               </div>
-              <h3 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100">{issue.title}</h3>       
+              <h3 className="font-display text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100">{issue.title}</h3>       
               <p className="mt-6 text-sm leading-loose text-slate-400">{issue.summary}</p>
               {issue.evidence && (
                 <div className="mt-8 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 text-[10px] font-medium leading-relaxed tracking-wide text-slate-400">
@@ -430,14 +430,14 @@ function GalleryPage() {
     <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
       <div className="mb-16 text-center md:mb-24">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Visual Archive</p>     
-        <h2 className="mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Traceable Evidence</h2>
+        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Traceable Evidence</h2>
       </div>
       {galleryItems.length > 0 ? (
         <div className="flex flex-col gap-24 md:gap-32">
           {categories.map(category => (
             <div key={category}>
               <div className="mb-12 border-b border-slate-100 dark:border-slate-800 pb-6 md:mb-16">
-                <h3 className="text-2xl font-light tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">{category}</h3>
+                <h3 className="font-display text-2xl font-light tracking-tight text-slate-900 dark:text-slate-100 md:text-3xl">{category}</h3>
               </div>
               <div className="grid gap-x-12 gap-y-16 sm:grid-cols-2 md:gap-y-24 lg:grid-cols-3">
                 {galleryItems.filter(item => item.category === category).map((asset) => (
@@ -453,7 +453,7 @@ function GalleryPage() {
                     </div>
                     <div className="mt-8 md:mt-10">
                       <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#7dbefa]/50 mb-3">{asset.category}</p>
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">{asset.title}</h3>
+                      <h3 className="font-display text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">{asset.title}</h3>
                       <p className="mt-4 text-xs leading-relaxed text-slate-400">{asset.caption}</p>
                     </div>
                   </article>
@@ -476,7 +476,7 @@ function GoatsPage() {
     <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
       <div className="mb-16 text-center md:mb-24">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Contributors</p>
-        <h2 className="mt-6 text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl">The Goats</h2>
+        <h2 className="font-display mt-6 text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl">The Goats</h2>
       </div>
       <div className="grid gap-8 md:grid-cols-2 md:gap-12">
         {goats.map((person) => (
@@ -489,7 +489,7 @@ function GoatsPage() {
                 onError={(e) => { e.target.src = 'https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png' }}
               />
               <div>
-                <h3 className="text-xl font-light tracking-tight text-slate-900 dark:text-slate-100 md:text-2xl">{person.name}</h3>
+                <h3 className="font-display text-xl font-light tracking-tight text-slate-900 dark:text-slate-100 md:text-2xl">{person.name}</h3>
                 <a className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-[#7dbefa] transition-colors" href={person.profile} target="_blank" rel="noreferrer">
                   {person.handle}
                 </a>
@@ -523,7 +523,7 @@ function CallToAction() {
       <div className="rounded-[2rem] bg-[#7dbefa]/5 py-20 px-8 text-center md:rounded-[40px] md:py-32 md:px-12">
         <div className="mx-auto max-w-xl">
           <BookOpenCheck size={28} className="mx-auto mb-8 text-[#7dbefa]/20 md:mb-10" />
-          <h2 className="text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Institutional Change</h2>
+          <h2 className="font-display text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Institutional Change</h2>
           <p className="mt-6 text-sm leading-loose text-slate-400 md:mt-10">
             This log is a collective effort to push for transparency. If you have verifiable evidence or technical insights, contribute to the open-source repository.
           </p>
@@ -547,7 +547,7 @@ function ErrorPage() {
       <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#fb3b64]/10 text-[#fb3b64] mb-8 md:mb-10">
         <AlertTriangle size={40} />
       </div>
-      <h2 className="text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl">Page Not Found</h2>
+      <h2 className="font-display text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl">Page Not Found</h2>
       <p className="mt-6 text-base leading-loose text-slate-400 max-w-xl md:text-lg">
         Something went wrong or the data you are looking for has been moved. Return to the registry to continue exploring the public log.
       </p>

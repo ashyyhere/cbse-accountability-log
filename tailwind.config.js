@@ -10,6 +10,10 @@ export default {
         warning: '#f97316',
         critical: '#dc2626',
       },
+      fontFamily: {
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       boxShadow: {
         civic: '0 18px 60px rgba(15, 23, 42, 0.18)',
       },
