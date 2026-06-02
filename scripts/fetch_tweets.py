@@ -16,103 +16,101 @@ SEARCH_QUERIES = [
 JSON_PATH = 'src/queries.json'
 
 async def fetch_tweets():
-    print("Starting fetch script...")
-    # Using a modern User-Agent to look like a real browser
+    print("--- Starting Fetch Script (v4) ---")
+    
+    # CRITICAL: User-Agent must be set to look like a real browser
     client = Client(
         'en-US',
-        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
+        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
     )
     
-    # Check for cookies first (most reliable for headless)
     cookies_json = os.getenv('X_COOKIES')
     if cookies_json:
-        print("Cookies found in environment. Attempting to load...")
+        print("X_COOKIES secret found. Processing...")
         try:
-            # Save to a temp file because twikit expects a file path
+            cookies_data = json.loads(cookies_json)
+            # Handle EditThisCookie format (list) or JSON format (dict)
+            if isinstance(cookies_data, list):
+                print("Converting cookie list to dictionary...")
+                cookie_dict = {c['name']: c['value'] for c in cookies_data}
+            else:
+                cookie_dict = cookies_data
+            
+            # Save to file for twikit to load
             with open('cookies.json', 'w') as f:
-                f.write(cookies_json)
+                json.dump(cookie_dict, f)
+            
             client.load_cookies('cookies.json')
-            print("Cookies loaded successfully!")
+            print("Cookies loaded into client.")
+            
+            # CRITICAL: Verify the login status
+            try:
+                user = await client.user()
+                print(f"VERIFIED: Logged in as @{user.screen_name}")
+            except Exception as e:
+                print(f"WARNING: Session verification failed: {e}")
+                print("The cookies might be invalid or X is challenging the session.")
         except Exception as e:
-            print(f"Failed to load cookies: {e}")
-            cookies_json = None # Fallback to login
-    
-    if not cookies_json:
-        # Credentials fallback
-        username = os.getenv('X_USERNAME')
-        email = os.getenv('X_EMAIL')
-        password = os.getenv('X_PASSWORD')
-
-        if not all([username, email, password]):
-            print("Error: No cookies and no credentials found.")
-            return
-
-        try:
-            print(f"Attempting login for user: {username}")
-            await client.login(
-                auth_info_1=username,
-                auth_info_2=email,
-                password=password
-            )
-            print("Login successful!")
-        except Exception as e:
-            print(f"Login failed critically: {e}")
-            print("TIP: Use the Cookie method to bypass this.")
-            return
+            print(f"ERROR: Could not parse X_COOKIES: {e}")
+    else:
+        print("ERROR: X_COOKIES secret is missing in GitHub Actions!")
+        return
 
     # Load existing queries
     if os.path.exists(JSON_PATH):
-        with open(JSON_PATH, 'r', encoding='utf-8') as f:
-            queries = json.load(f)
-        print(f"Loaded {len(queries)} existing queries from {JSON_PATH}")
+        try:
+            with open(JSON_PATH, 'r', encoding='utf-8') as f:
+                queries = json.load(f)
+            print(f"Loaded {len(queries)} existing queries.")
+        except Exception as e:
+            print(f"Error reading {JSON_PATH}: {e}")
+            queries = []
     else:
         queries = []
-        print(f"No existing JSON found at {JSON_PATH}, starting fresh.")
 
     existing_ids = {str(q['id']) for q in queries}
     new_tweets_count = 0
 
     for query in SEARCH_QUERIES:
-        print(f"--- Searching for query: '{query}' ---")
+        print(f"\n--- Searching: '{query}' ---")
         try:
-            # Twikit 2.x+ uses search_tweet. 
+            # Twikit 2.x search
             tweets = await client.search_tweet(query, 'Latest')
-
-            if not tweets:
-                print(f"No results found for '{query}'.")
-                continue
-
-            print(f"Found {len(tweets)} total tweets for this query.")
-
-            for tweet in tweets:
-                tweet_id_str = str(tweet.id)
-                if tweet_id_str not in existing_ids:
-                    print(f"New tweet found! ID: {tweet_id_str}")
-                    new_query = {
-                        "id": tweet_id_str,
-                        "text": tweet.text,
-                        "handle": f"@{tweet.user.screen_name}",
-                        "date": str(tweet.created_at),
-                        "category": "Uncategorized"
-                    }
-                    queries.insert(0, new_query)
-                    existing_ids.add(tweet_id_str)
-                    new_tweets_count += 1
+            if tweets:
+                print(f"Found {len(tweets)} tweets.")
+                for tweet in tweets:
+                    tid = str(tweet.id)
+                    if tid not in existing_ids:
+                        print(f"Adding new tweet: {tid}")
+                        queries.insert(0, {
+                            "id": tid,
+                            "text": tweet.text,
+                            "handle": f"@{tweet.user.screen_name}",
+                            "date": str(tweet.created_at),
+                            "category": "Uncategorized"
+                        })
+                        existing_ids.add(tid)
+                        new_tweets_count += 1
+            else:
+                print("No results found for this query.")
         except Exception as e:
-            print(f"Search failed for '{query}': {e}")
-            print("This often means the session cookies have expired or X is blocking this IP.")
-
-    # Keep only the last 100
-    queries = queries[:100]
+            print(f"SEARCH FAILED: {e}")
+            if "KEY_BYTE" in str(e) or "ClientTransaction" in str(e):
+                print("ADVICE: This is a transaction error. Try updating cookies again.")
 
     if new_tweets_count > 0:
-        with open(JSON_PATH, 'w', encoding='utf-8') as f:
-            json.dump(queries, f, indent=2, ensure_ascii=False)
-        print(f"SUCCESS: Saved {new_tweets_count} new tweets to {JSON_PATH}")
+        # Keep only last 100
+        queries = queries[:100]
+        try:
+            with open(JSON_PATH, 'w', encoding='utf-8') as f:
+                json.dump(queries, f, indent=2, ensure_ascii=False)
+            print(f"\nSUCCESS: Saved {new_tweets_count} new tweets to {JSON_PATH}")
+        except Exception as e:
+            print(f"Error saving {JSON_PATH}: {e}")
     else:
-        print("No new unique tweets were found in this run.")
+        print("\nNo new unique tweets found in this run.")
 
-    print("Script finished.")
+    print("--- Script Finished ---")
 
 if __name__ == "__main__":
     asyncio.run(fetch_tweets())
