@@ -166,6 +166,34 @@ const galleryItems = [
     caption: "Further demonstration of sensitive information leakage.",
     notes: "Source: @ni5arga on X. Severe risk to data privacy.",
   },
+  {
+    title: "Portal Login Error (Evidence 1)",
+    path: "/assets/login-issue-1.jpg",
+    category: "Login Issues",
+    caption: "Widespread login failures reported by students immediately after the re-evaluation portal was restored.",
+    notes: "Indicates persistent infrastructure stability issues during peak traffic periods.",
+  },
+  {
+    title: "Authentication Timeout",
+    path: "/assets/login-issue-2.jpg",
+    category: "Login Issues",
+    caption: "Session errors and timeouts preventing students from accessing their re-evaluation status.",
+    notes: "Occurred during the post-restoration phase of the OSM portal, impacting transparency.",
+  },
+  {
+    title: "Access Denied Glitch",
+    path: "/assets/login-issue-3.jpg",
+    category: "Login Issues",
+    caption: "Students encountering 'Access Denied' or 'Invalid Credentials' errors despite correct data entry.",
+    notes: "Pointed to potential database synchronization issues or session hijacking prevention misconfigurations.",
+  },
+  {
+    title: "System Congestion Error",
+    path: "/assets/HJzVv3IbMAAgN0L.jpg",
+    category: "Login Issues",
+    caption: "Technical error page displayed to users attempting to log in after the portal's supposed restoration.",
+    notes: "Evidence of the 'Service Unavailable' or equivalent errors faced by thousands of students.",
+  },
 ];
 
 const goats = [

@@ -1,37 +1,38 @@
-name: Fetch Latest Tweets
+name: Sync Tweets Manually
 
 on:
-  schedule:
-    - cron: '0 * * * *' # Runs every 1 hour
-  workflow_dispatch: # Allows manual trigger
+  repository_dispatch:
+    types: [sync_tweets]
+  workflow_dispatch: # Still allow manual run
 
 jobs:
-  fetch:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
+      - name: Update queries.json
         run: |
-          python -m pip install --upgrade pip
-          pip install ntscraper
-
-      - name: Run fetch script
-        env:
-          X_COOKIES: ${{ secrets.X_COOKIES }}
-          X_USERNAME: ${{ secrets.X_USERNAME }}
-          X_EMAIL: ${{ secrets.X_EMAIL }}
-          X_PASSWORD: ${{ secrets.X_PASSWORD }}
-        run: python scripts/fetch_tweets.py
+          echo '${{ github.event.client_payload.tweets }}' > new_tweets.json
+          python -c "
+          import json, os
+          with open('src/queries.json', 'r') as f: queries = json.load(f)
+          with open('new_tweets.json', 'r') as f: new_batch = json.load(f)
+          existing_ids = {str(q['id']) for q in queries}
+          added = 0
+          for t in new_batch:
+              if str(t['id']) not in existing_ids:
+                  queries.insert(0, t)
+                  existing_ids.add(str(t['id']))
+                  added += 1
+          queries = queries[:100]
+          with open('src/queries.json', 'w') as f: json.dump(queries, f, indent=2)
+          print(f'Added {added} new tweets')
+          "
 
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Automated: Sync latest student queries from X"
+          commit_message: "Manual Sync: Added new student queries via Bookmarklet"
           file_pattern: 'src/queries.json'
