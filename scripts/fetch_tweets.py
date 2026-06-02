@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import random
 from twikit import Client
 from datetime import datetime
 
@@ -16,55 +17,49 @@ SEARCH_QUERIES = [
 JSON_PATH = 'src/queries.json'
 
 async def fetch_tweets():
-    print("--- Starting Fetch Script (v4) ---")
+    print("--- Starting Fetch Script (v5 - Hardened) ---")
     
-    # CRITICAL: User-Agent must be set to look like a real browser
+    # Using a slightly older, more stable User-Agent
     client = Client(
         'en-US',
-        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+        user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     )
     
     cookies_json = os.getenv('X_COOKIES')
     if cookies_json:
-        print("X_COOKIES secret found. Processing...")
+        print("X_COOKIES found. Loading...")
         try:
             cookies_data = json.loads(cookies_json)
-            # Handle EditThisCookie format (list) or JSON format (dict)
             if isinstance(cookies_data, list):
-                print("Converting cookie list to dictionary...")
                 cookie_dict = {c['name']: c['value'] for c in cookies_data}
             else:
                 cookie_dict = cookies_data
             
-            # Save to file for twikit to load
             with open('cookies.json', 'w') as f:
                 json.dump(cookie_dict, f)
-            
             client.load_cookies('cookies.json')
-            print("Cookies loaded into client.")
+            print("Cookies loaded.")
             
-            # CRITICAL: Verify the login status
+            # Try to initialize session tokens before searching
+            print("Refreshing session tokens...")
             try:
-                user = await client.user()
-                print(f"VERIFIED: Logged in as @{user.screen_name}")
+                # This helps initialize the 'KEY_BYTE' and transaction keys
+                await client.get_guest_token()
+                print("Session tokens initialized.")
             except Exception as e:
-                print(f"WARNING: Session verification failed: {e}")
-                print("The cookies might be invalid or X is challenging the session.")
+                print(f"Note: Guest token refresh returned: {e}")
+
         except Exception as e:
-            print(f"ERROR: Could not parse X_COOKIES: {e}")
+            print(f"ERROR: Cookie processing failed: {e}")
     else:
-        print("ERROR: X_COOKIES secret is missing in GitHub Actions!")
+        print("ERROR: X_COOKIES is missing.")
         return
 
     # Load existing queries
     if os.path.exists(JSON_PATH):
-        try:
-            with open(JSON_PATH, 'r', encoding='utf-8') as f:
-                queries = json.load(f)
-            print(f"Loaded {len(queries)} existing queries.")
-        except Exception as e:
-            print(f"Error reading {JSON_PATH}: {e}")
-            queries = []
+        with open(JSON_PATH, 'r', encoding='utf-8') as f:
+            queries = json.load(f)
+        print(f"Loaded {len(queries)} existing queries.")
     else:
         queries = []
 
@@ -73,15 +68,26 @@ async def fetch_tweets():
 
     for query in SEARCH_QUERIES:
         print(f"\n--- Searching: '{query}' ---")
+        # Add a random delay to look more human
+        await asyncio.sleep(random.uniform(2, 5))
+        
         try:
-            # Twikit 2.x search
-            tweets = await client.search_tweet(query, 'Latest')
+            # Attempt search with a fallback retry
+            tweets = None
+            for attempt in range(2):
+                try:
+                    tweets = await client.search_tweet(query, 'Latest')
+                    if tweets is not None: break
+                except Exception as e:
+                    print(f"Attempt {attempt+1} failed: {e}")
+                    await asyncio.sleep(5)
+            
             if tweets:
                 print(f"Found {len(tweets)} tweets.")
                 for tweet in tweets:
                     tid = str(tweet.id)
                     if tid not in existing_ids:
-                        print(f"Adding new tweet: {tid}")
+                        print(f"New: {tid}")
                         queries.insert(0, {
                             "id": tid,
                             "text": tweet.text,
@@ -92,23 +98,17 @@ async def fetch_tweets():
                         existing_ids.add(tid)
                         new_tweets_count += 1
             else:
-                print("No results found for this query.")
+                print("No results.")
         except Exception as e:
-            print(f"SEARCH FAILED: {e}")
-            if "KEY_BYTE" in str(e) or "ClientTransaction" in str(e):
-                print("ADVICE: This is a transaction error. Try updating cookies again.")
+            print(f"CRITICAL SEARCH FAILURE: {e}")
 
     if new_tweets_count > 0:
-        # Keep only last 100
         queries = queries[:100]
-        try:
-            with open(JSON_PATH, 'w', encoding='utf-8') as f:
-                json.dump(queries, f, indent=2, ensure_ascii=False)
-            print(f"\nSUCCESS: Saved {new_tweets_count} new tweets to {JSON_PATH}")
-        except Exception as e:
-            print(f"Error saving {JSON_PATH}: {e}")
+        with open(JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(queries, f, indent=2, ensure_ascii=False)
+        print(f"\nSUCCESS: Added {new_tweets_count} new tweets.")
     else:
-        print("\nNo new unique tweets found in this run.")
+        print("\nNo new tweets found.")
 
     print("--- Script Finished ---")
 
