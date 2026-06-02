@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
   Newspaper,
   Moon,
+  MessageSquare,
   Sun,
   Scale,
   ShieldAlert,
@@ -22,6 +23,7 @@ const routes = [
   { id: "home", label: "Home", href: "#/" },
   { id: "issues", label: "Key Issues", href: "#/issues" },
   { id: "results", label: "Results Issues", href: "#/results" },
+  { id: "queries", label: "Queries", href: "#/queries" },
   { id: "images", label: "Gallery", href: "#/images" },
   { id: "goats", label: "The Goats", href: "#/goats" },
   { id: "contribute", label: "Contribute", href: "https://github.com/ashyyhere/cbse-accountability-log" },
@@ -261,6 +263,7 @@ function App() {
         {route === "home" && <Hero />}
         {route === "issues" && <IssueOverview />}
         {route === "results" && <ResultsIssues />}
+        {route === "queries" && <QueriesPage />}
         {route === "images" && <GalleryPage />}
         {route === "goats" && <GoatsPage />}
         {route === "contribute" && <CallToAction />}
@@ -418,6 +421,146 @@ function ResultsIssues() {
             </article>
           );
         })}
+      </div>
+    </section>
+  );
+}
+
+const mockQueries = [
+  {
+    id: 1,
+    text: "My chemistry paper was checked so poorly. I wrote everything correctly but got only 40 marks. @cbseindia29 please look into this. #CBSE #Results",
+    handle: "@student_alpha",
+    date: "June 1, 2026",
+    category: "Uncategorized",
+  },
+  {
+    id: 2,
+    text: "The OSM portal is not loading for the last 2 hours. How am I supposed to check my re-evaluation status? #CBSE #OSM",
+    handle: "@tech_seeker",
+    date: "May 31, 2026",
+    category: "Uncategorized",
+  },
+  {
+    id: 3,
+    text: "What is the last date to apply for the second round of re-evaluation? The circular is very confusing. @cbseindia29",
+    handle: "@parent_nexus",
+    date: "May 30, 2026",
+    category: "Uncategorized",
+  },
+  {
+    id: 4,
+    text: "Why are some students getting 100 in everything while those who worked hard are suffering? System is rigged. #CBSEAccountability",
+    handle: "@justice_now",
+    date: "May 29, 2026",
+    category: "Uncategorized",
+  },
+];
+
+function QueriesPage() {
+  const [queries, setQueries] = useState(mockQueries);
+  const [isCategorizing, setIsCategorizing] = useState(false);
+
+  const categorizeWithLLM = async () => {
+    setIsCategorizing(true);
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        alert("Please set VITE_OPENAI_API_KEY in your environment.");
+        setIsCategorizing(false);
+        return;
+      }
+
+      const prompt = `Categorize the following student queries into these broad categories: "Evaluation Issues", "Technical Glitches", "Policy/Process", "General Inquiry".
+      Return the result as a JSON array of objects with 'id' and 'category'.
+      
+      Queries:
+      ${queries.map(q => `ID ${q.id}: ${q.text}`).join("\n")}
+      `;
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: "You are a helpful assistant that categorizes student grievances." },
+            { role: "user", content: prompt }
+          ],
+          response_format: { type: "json_object" }
+        }),
+      });
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
+      
+      // Expected structure: { "categories": [{ "id": 1, "category": "..." }, ...] }
+      // The prompt might need to be more specific for the key name, but gpt-4o is usually good.
+      // Let's assume it returns a key 'categories'.
+      
+      const categoryMap = {};
+      (result.categories || result.results || []).forEach(item => {
+        categoryMap[item.id] = item.category;
+      });
+
+      setQueries(prev => prev.map(q => ({
+        ...q,
+        category: categoryMap[q.id] || q.category
+      })));
+
+    } catch (error) {
+      console.error("Error categorizing queries:", error);
+      alert("Failed to categorize queries. Check console for details.");
+    } finally {
+      setIsCategorizing(false);
+    }
+  };
+
+  return (
+    <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
+      <div className="mb-16 flex flex-col items-center justify-between gap-8 md:mb-24 md:flex-row">
+        <div className="text-center md:text-left">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Student Voices</p>
+          <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Twitter Curation</h2>
+        </div>
+        <button
+          onClick={categorizeWithLLM}
+          disabled={isCategorizing}
+          className={`inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#7dbefa] px-8 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100`}
+        >
+          {isCategorizing ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          ) : (
+            <MessageSquare size={14} />
+          )}
+          {isCategorizing ? "Categorizing..." : "Categorize with LLM"}
+        </button>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {queries.map((query) => (
+          <article key={query.id} className="soft-shadow rounded-3xl bg-white dark:bg-slate-900/50 p-8 border border-slate-50 dark:border-slate-800/50">
+            <div className="mb-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-6">
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{query.handle}</p>
+                <p className="text-[10px] text-slate-400 mt-1">{query.date}</p>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-[8px] font-bold uppercase tracking-widest ${
+                query.category === "Uncategorized" 
+                  ? "bg-slate-100 text-slate-400 dark:bg-slate-800" 
+                  : "bg-[#7dbefa]/10 text-[#7dbefa]"
+              }`}>
+                {query.category}
+              </span>
+            </div>
+            <p className="text-sm leading-loose text-slate-500 dark:text-slate-400 italic">
+              "{query.text}"
+            </p>
+          </article>
+        ))}
       </div>
     </section>
   );
