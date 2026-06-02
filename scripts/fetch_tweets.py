@@ -33,7 +33,7 @@ def create_scraper():
         scraper = Nitter()
         if getattr(scraper, 'working_instances', None):
             print(f"Default scraper initialized with {len(scraper.working_instances)} working instances.")
-            return scraper
+            return scraper, None
         print("Default scraper initialized but found no working instances.")
     except Exception as e:
         print(f"Default Nitter instance list failed: {e}")
@@ -43,19 +43,20 @@ def create_scraper():
         try:
             print(f"Trying fallback instance: {fallback}")
             scraper = Nitter(instances=[fallback], skip_instance_check=True)
+            scraper.instance = fallback
             if getattr(scraper, 'working_instances', None):
                 print(f"Fallback scraper initialized with instance: {fallback}")
-                return scraper
+                return scraper, fallback
             print(f"Fallback scraper initialized but no working instances for {fallback}.")
         except Exception as e:
             print(f"Fallback instance {fallback} failed: {e}")
 
     print("ERROR: No available Nitter instances could be initialized.")
-    return None
+    return None, None
 
 def fetch_tweets():
     print("--- Starting Fetch Script (Nitter - Zero Cookie) ---")
-    scraper = create_scraper()
+    scraper, instance = create_scraper()
     if scraper is None:
         print("Exiting because no Nitter scraper could be initialized.")
         return
@@ -78,9 +79,9 @@ def fetch_tweets():
     for query in SEARCH_QUERIES:
         print(f"\n--- Searching Nitter for: '{query}' ---")
         try:
-            # Fetch latest tweets from a random Nitter instance
+            # Fetch latest tweets from a random Nitter instance or explicit fallback instance
             # mode='term' is for search, number=20 is results limit
-            results = scraper.get_tweets(query, mode='term', number=20)
+            results = scraper.get_tweets(query, mode='term', number=20, instance=instance)
             
             if results and 'tweets' in results:
                 print(f"Found {len(results['tweets'])} tweets.")
