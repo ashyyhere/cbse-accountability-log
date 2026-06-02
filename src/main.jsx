@@ -459,85 +459,12 @@ const mockQueries = [
 
 function QueriesPage() {
   const [queries, setQueries] = useState(mockQueries);
-  const [isCategorizing, setIsCategorizing] = useState(false);
-
-  const categorizeWithLLM = async () => {
-    setIsCategorizing(true);
-    try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!apiKey) {
-        alert("Please set VITE_OPENAI_API_KEY in your environment.");
-        setIsCategorizing(false);
-        return;
-      }
-
-      const prompt = `Categorize the following student queries into these broad categories: "Evaluation Issues", "Technical Glitches", "Policy/Process", "General Inquiry".
-      Return the result as a JSON array of objects with 'id' and 'category'.
-      
-      Queries:
-      ${queries.map(q => `ID ${q.id}: ${q.text}`).join("\n")}
-      `;
-
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: "You are a helpful assistant that categorizes student grievances." },
-            { role: "user", content: prompt }
-          ],
-          response_format: { type: "json_object" }
-        }),
-      });
-
-      const data = await response.json();
-      const result = JSON.parse(data.choices[0].message.content);
-      
-      // Expected structure: { "categories": [{ "id": 1, "category": "..." }, ...] }
-      // The prompt might need to be more specific for the key name, but gpt-4o is usually good.
-      // Let's assume it returns a key 'categories'.
-      
-      const categoryMap = {};
-      (result.categories || result.results || []).forEach(item => {
-        categoryMap[item.id] = item.category;
-      });
-
-      setQueries(prev => prev.map(q => ({
-        ...q,
-        category: categoryMap[q.id] || q.category
-      })));
-
-    } catch (error) {
-      console.error("Error categorizing queries:", error);
-      alert("Failed to categorize queries. Check console for details.");
-    } finally {
-      setIsCategorizing(false);
-    }
-  };
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
-      <div className="mb-16 flex flex-col items-center justify-between gap-8 md:mb-24 md:flex-row">
-        <div className="text-center md:text-left">
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Student Voices</p>
-          <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Twitter Curation</h2>
-        </div>
-        <button
-          onClick={categorizeWithLLM}
-          disabled={isCategorizing}
-          className={`inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#7dbefa] px-8 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100`}
-        >
-          {isCategorizing ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-          ) : (
-            <MessageSquare size={14} />
-          )}
-          {isCategorizing ? "Categorizing..." : "Categorize with LLM"}
-        </button>
+      <div className="mb-16 text-center md:mb-24 md:text-left">
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Student Voices</p>
+        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Twitter Curation</h2>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
