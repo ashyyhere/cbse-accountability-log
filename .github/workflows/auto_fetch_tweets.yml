@@ -8,6 +8,8 @@ on:
 jobs:
   fetch-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -23,7 +25,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ntscraper
+          pip install requests ntscraper
 
       - name: Fetch tweets from X topics
         run: python scripts/fetch_tweets.py
