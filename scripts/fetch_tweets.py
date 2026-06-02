@@ -17,28 +17,45 @@ JSON_PATH = 'src/queries.json'
 
 async def fetch_tweets():
     print("Starting fetch script...")
-    # Credentials from environment variables
-    username = os.getenv('X_USERNAME')
-    email = os.getenv('X_EMAIL')
-    password = os.getenv('X_PASSWORD')
-
-    if not all([username, email, password]):
-        print(f"Error: Missing credentials. Username: {'Set' if username else 'Missing'}, Email: {'Set' if email else 'Missing'}, Password: {'Set' if password else 'Missing'}")
-        return
-
     client = Client('en-US')
     
-    try:
-        print(f"Attempting login for user: {username}")
-        await client.login(
-            auth_info_1=username,
-            auth_info_2=email,
-            password=password
-        )
-        print("Login successful!")
-    except Exception as e:
-        print(f"Login failed critically: {e}")
-        return
+    # Check for cookies first (most reliable for headless)
+    cookies_json = os.getenv('X_COOKIES')
+    if cookies_json:
+        print("Cookies found in environment. Attempting to load...")
+        try:
+            # Save to a temp file because twikit expects a file path
+            with open('cookies.json', 'w') as f:
+                f.write(cookies_json)
+            client.load_cookies('cookies.json')
+            print("Cookies loaded successfully!")
+        except Exception as e:
+            print(f"Failed to load cookies: {e}")
+            cookies_json = None # Fallback to login
+    
+    if not cookies_json:
+        # Credentials fallback
+        username = os.getenv('X_USERNAME')
+        email = os.getenv('X_EMAIL')
+        password = os.getenv('X_PASSWORD')
+
+        if not all([username, email, password]):
+            print("Error: No cookies and no credentials found.")
+            return
+
+        try:
+            print(f"Attempting login for user: {username}")
+            await client.login(
+                auth_info_1=username,
+                auth_info_2=email,
+                password=password
+            )
+            print("Login successful!")
+            # Optional: client.save_cookies('cookies.json') 
+        except Exception as e:
+            print(f"Login failed critically: {e}")
+            print("TIP: Use the Cookie method to bypass this.")
+            return
 
     # Load existing queries
     if os.path.exists(JSON_PATH):
