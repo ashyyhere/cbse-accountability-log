@@ -11,17 +11,20 @@ import {
   Image as ImageIcon,
   Newspaper,
   Moon,
+  MessageSquare,
   Sun,
   Scale,
   ShieldAlert,
   Workflow,
 } from "lucide-react";
 import "./styles.css";
+import queriesData from "./queries.json";
 
 const routes = [
   { id: "home", label: "Home", href: "#/" },
   { id: "issues", label: "Key Issues", href: "#/issues" },
   { id: "results", label: "Results Issues", href: "#/results" },
+  { id: "queries", label: "Queries", href: "#/queries" },
   { id: "images", label: "Gallery", href: "#/images" },
   { id: "goats", label: "The Goats", href: "#/goats" },
   { id: "contribute", label: "Contribute", href: "https://github.com/ashyyhere/cbse-accountability-log" },
@@ -261,6 +264,7 @@ function App() {
         {route === "home" && <Hero />}
         {route === "issues" && <IssueOverview />}
         {route === "results" && <ResultsIssues />}
+        {route === "queries" && <QueriesPage />}
         {route === "images" && <GalleryPage />}
         {route === "goats" && <GoatsPage />}
         {route === "contribute" && <CallToAction />}
@@ -418,6 +422,42 @@ function ResultsIssues() {
             </article>
           );
         })}
+      </div>
+    </section>
+  );
+}
+
+function QueriesPage() {
+  const [queries] = useState(queriesData);
+
+  return (
+    <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
+      <div className="mb-16 text-center md:mb-24 md:text-left">
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Student Voices</p>
+        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Twitter Curation</h2>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {queries.map((query) => (
+          <article key={query.id} className="soft-shadow rounded-3xl bg-white dark:bg-slate-900/50 p-8 border border-slate-50 dark:border-slate-800/50">
+            <div className="mb-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-6">
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{query.handle}</p>
+                <p className="text-[10px] text-slate-400 mt-1">{query.date}</p>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-[8px] font-bold uppercase tracking-widest ${
+                query.category === "Uncategorized" 
+                  ? "bg-slate-100 text-slate-400 dark:bg-slate-800" 
+                  : "bg-[#7dbefa]/10 text-[#7dbefa]"
+              }`}>
+                {query.category}
+              </span>
+            </div>
+            <p className="text-sm leading-loose text-slate-500 dark:text-slate-400 italic">
+              "{query.text}"
+            </p>
+          </article>
+        ))}
       </div>
     </section>
   );
