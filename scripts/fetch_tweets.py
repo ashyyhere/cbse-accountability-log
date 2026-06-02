@@ -55,7 +55,6 @@ async def fetch_tweets():
                 password=password
             )
             print("Login successful!")
-            # Optional: client.save_cookies('cookies.json') 
         except Exception as e:
             print(f"Login failed critically: {e}")
             print("TIP: Use the Cookie method to bypass this.")
@@ -76,13 +75,19 @@ async def fetch_tweets():
     for query in SEARCH_QUERIES:
         print(f"--- Searching for query: '{query}' ---")
         try:
+            # Twikit 2.x+ uses search_tweet. 
             tweets = await client.search_tweet(query, 'Latest')
+
+            if not tweets:
+                print(f"No results found for '{query}'.")
+                continue
+
             print(f"Found {len(tweets)} total tweets for this query.")
-            
+
             for tweet in tweets:
                 tweet_id_str = str(tweet.id)
                 if tweet_id_str not in existing_ids:
-                    print(f"New tweet found! ID: {tweet_id_str} | User: {tweet.user.screen_name}")
+                    print(f"New tweet found! ID: {tweet_id_str}")
                     new_query = {
                         "id": tweet_id_str,
                         "text": tweet.text,
@@ -93,11 +98,9 @@ async def fetch_tweets():
                     queries.insert(0, new_query)
                     existing_ids.add(tweet_id_str)
                     new_tweets_count += 1
-                else:
-                    # Skip logging duplicates to avoid log bloat
-                    pass
         except Exception as e:
             print(f"Search failed for '{query}': {e}")
+            print("This often means the session cookies have expired or X is blocking this IP.")
 
     # Keep only the last 100
     queries = queries[:100]
