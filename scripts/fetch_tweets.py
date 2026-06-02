@@ -17,10 +17,39 @@ SEARCH_QUERIES = [
 
 JSON_PATH = 'src/queries.json'
 
+FALLBACK_NITTER_INSTANCES = [
+    "https://nitter.net",
+    "https://nitter.42l.fr",
+    "https://nitter.kavin.rocks",
+    "https://nitter.eu.org",
+    "https://nitter.snopyta.org",
+]
+
+
+def create_scraper():
+    try:
+        print("Initializing Nitter scraper with default instance list...")
+        return Nitter()
+    except Exception as e:
+        print(f"Default Nitter instance list failed: {e}")
+
+    for fallback in FALLBACK_NITTER_INSTANCES:
+        try:
+            print(f"Trying fallback instance: {fallback}")
+            return Nitter(instances=[fallback], skip_instance_check=False)
+        except Exception as e:
+            print(f"Fallback instance {fallback} failed: {e}")
+
+    print("ERROR: No available Nitter instances could be initialized.")
+    return None
+
 def fetch_tweets():
     print("--- Starting Fetch Script (Nitter - Zero Cookie) ---")
-    scraper = Nitter()
-    
+    scraper = create_scraper()
+    if scraper is None:
+        print("Exiting because no Nitter scraper could be initialized.")
+        return
+
     # Load existing queries
     if os.path.exists(JSON_PATH):
         try:
