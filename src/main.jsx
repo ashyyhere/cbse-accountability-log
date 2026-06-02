@@ -18,6 +18,7 @@ import {
   Workflow,
 } from "lucide-react";
 import "./styles.css";
+import queriesData from "./queries.json";
 
 const routes = [
   { id: "home", label: "Home", href: "#/" },
@@ -426,39 +427,8 @@ function ResultsIssues() {
   );
 }
 
-const mockQueries = [
-  {
-    id: 1,
-    text: "My chemistry paper was checked so poorly. I wrote everything correctly but got only 40 marks. @cbseindia29 please look into this. #CBSE #Results",
-    handle: "@student_alpha",
-    date: "June 1, 2026",
-    category: "Uncategorized",
-  },
-  {
-    id: 2,
-    text: "The OSM portal is not loading for the last 2 hours. How am I supposed to check my re-evaluation status? #CBSE #OSM",
-    handle: "@tech_seeker",
-    date: "May 31, 2026",
-    category: "Uncategorized",
-  },
-  {
-    id: 3,
-    text: "What is the last date to apply for the second round of re-evaluation? The circular is very confusing. @cbseindia29",
-    handle: "@parent_nexus",
-    date: "May 30, 2026",
-    category: "Uncategorized",
-  },
-  {
-    id: 4,
-    text: "Why are some students getting 100 in everything while those who worked hard are suffering? System is rigged. #CBSEAccountability",
-    handle: "@justice_now",
-    date: "May 29, 2026",
-    category: "Uncategorized",
-  },
-];
-
 function QueriesPage() {
-  const [queries, setQueries] = useState(mockQueries);
+  const [queries] = useState(queriesData);
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
