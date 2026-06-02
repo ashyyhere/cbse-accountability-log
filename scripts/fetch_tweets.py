@@ -11,6 +11,7 @@ SEARCH_QUERIES = [
     "CBSE vulnerability",
     "CBSE security vulnerability",
     "CBSE evaluation issues",
+    "re-eval issues",
     "CBSE reevaluation",
     "CBSE reevaulution",
     "student CBSE reevaluation",
