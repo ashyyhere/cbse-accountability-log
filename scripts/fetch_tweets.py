@@ -27,16 +27,26 @@ FALLBACK_NITTER_INSTANCES = [
 
 
 def create_scraper():
+    # First, try the default instance list from ntscraper
     try:
         print("Initializing Nitter scraper with default instance list...")
-        return Nitter()
+        scraper = Nitter()
+        if getattr(scraper, 'working_instances', None):
+            print(f"Default scraper initialized with {len(scraper.working_instances)} working instances.")
+            return scraper
+        print("Default scraper initialized but found no working instances.")
     except Exception as e:
         print(f"Default Nitter instance list failed: {e}")
 
+    # Fallback to a known list of Nitter instances and skip instance health checking
     for fallback in FALLBACK_NITTER_INSTANCES:
         try:
             print(f"Trying fallback instance: {fallback}")
-            return Nitter(instances=[fallback], skip_instance_check=False)
+            scraper = Nitter(instances=[fallback], skip_instance_check=True)
+            if getattr(scraper, 'working_instances', None):
+                print(f"Fallback scraper initialized with instance: {fallback}")
+                return scraper
+            print(f"Fallback scraper initialized but no working instances for {fallback}.")
         except Exception as e:
             print(f"Fallback instance {fallback} failed: {e}")
 
