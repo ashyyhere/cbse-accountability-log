@@ -5,10 +5,14 @@ from ntscraper import Nitter
 # Search queries for relevant student issues
 SEARCH_QUERIES = [
     "CBSE OSM",
-    "CBSE evaluation issues",
-    "CBSE answer sheet scan",
+    "CBSE vulnerability",
     "CBSE security vulnerability",
-    "CBSE result anomaly"
+    "CBSE evaluation issues",
+    "CBSE reevaluation",
+    "CBSE reevaulution",
+    "student CBSE reevaluation",
+    "CBSE result anomaly",
+    "CBSE answer sheet scan"
 ]
 
 JSON_PATH = 'src/queries.json'
