@@ -17,7 +17,11 @@ JSON_PATH = 'src/queries.json'
 
 async def fetch_tweets():
     print("Starting fetch script...")
-    client = Client('en-US')
+    # Using a modern User-Agent to look like a real browser
+    client = Client(
+        'en-US',
+        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
+    )
     
     # Check for cookies first (most reliable for headless)
     cookies_json = os.getenv('X_COOKIES')
