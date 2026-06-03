@@ -24,7 +24,7 @@ const routes = [
   { id: "home", label: "Home", href: "#/" },
   { id: "issues", label: "Key Issues", href: "#/issues" },
   { id: "results", label: "Results Issues", href: "#/results" },
-  { id: "queries", label: "Queries", href: "#/queries" },
+  { id: "voices", label: "Voices", href: "#/voices" },
   { id: "images", label: "Gallery", href: "#/images" },
   { id: "goats", label: "The Goats", href: "#/goats" },
   { id: "contribute", label: "Contribute", href: "https://github.com/ashyyhere/cbse-accountability-log" },
@@ -292,7 +292,7 @@ function App() {
         {route === "home" && <Hero />}
         {route === "issues" && <IssueOverview />}
         {route === "results" && <ResultsIssues />}
-        {route === "queries" && <QueriesPage />}
+        {route === "voices" && <VoicesPage />}
         {route === "images" && <GalleryPage />}
         {route === "goats" && <GoatsPage />}
         {route === "contribute" && <CallToAction />}
@@ -455,14 +455,103 @@ function ResultsIssues() {
   );
 }
 
-function QueriesPage() {
+function VoicesPage() {
   const [queries] = useState(queriesData);
+  const [form, setForm] = useState({ handle: "", text: "" });
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const response = await fetch("/.netlify/functions/submit-voice", {
+        method: "POST",
+        body: JSON.stringify(form),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus({ 
+          type: "success", 
+          message: "Thank you! Your voice has been verified and added to the log. It will appear here after the next site build (usually 1-2 minutes)." 
+        });
+        setForm({ handle: "", text: "" });
+      } else {
+        setStatus({ 
+          type: "error", 
+          message: data.error || "Something went wrong. Please try again." 
+        });
+      }
+    } catch (error) {
+      setStatus({ type: "error", message: "Failed to connect to the server." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
       <div className="mb-16 text-center md:mb-24 md:text-left">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Student Voices</p>
-        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Twitter Curation</h2>
+        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Grievance Registry</h2>
+      </div>
+
+      {/* Submission Form */}
+      <div className="mb-20 rounded-[2rem] bg-slate-50 dark:bg-slate-900/30 p-8 border border-slate-100 dark:border-slate-800/50 md:p-12">
+        <div className="mb-10">
+          <h3 className="font-display text-xl font-medium text-slate-900 dark:text-slate-100">Submit Your Voice</h3>
+          <p className="mt-2 text-xs text-slate-400">Share your experience with CBSE re-evaluation or OSM. Verified reports are added to the public log.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <label htmlFor="handle" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Name or X Handle</label>
+              <input
+                type="text"
+                id="handle"
+                required
+                placeholder="@username or Name"
+                className="w-full rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-6 py-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#7dbefa] transition-colors"
+                value={form.handle}
+                onChange={(e) => setForm({ ...form, handle: e.target.value })}
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="message" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Your Issue / Report</label>
+            <textarea
+              id="message"
+              required
+              rows="4"
+              placeholder="Describe the issue you faced with digital marking, scan quality, or security..."
+              className="w-full rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-6 py-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#7dbefa] transition-colors"
+              value={form.text}
+              onChange={(e) => setForm({ ...form, text: e.target.value })}
+            ></textarea>
+          </div>
+          
+          <div className="flex flex-col items-center gap-6 md:flex-row">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#7dbefa] px-10 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 md:w-auto"
+            >
+              {isSubmitting ? "Verifying with LLM..." : "Submit Report"}
+            </button>
+            
+            {status.message && (
+              <p className={`text-xs font-medium ${status.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+                {status.message}
+              </p>
+            )}
+          </div>
+        </form>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
