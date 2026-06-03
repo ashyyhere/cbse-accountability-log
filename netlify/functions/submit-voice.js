@@ -24,6 +24,7 @@ export const handler = async (event) => {
 
   try {
     // 1. Verify with Gemini LLM
+    console.log("Starting Gemini verification for:", handle);
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     
     const prompt = `You are a moderator for a site tracking institutional failures in CBSE digital marking (OSM) and re-evaluation. 
@@ -44,14 +45,27 @@ export const handler = async (event) => {
       })
     });
 
+    if (!geminiResponse.ok) {
+      const errorText = await geminiResponse.text();
+      console.error("Gemini API Error:", errorText);
+      throw new Error(`Gemini API failed: ${geminiResponse.statusText}`);
+    }
+
     const geminiData = await geminiResponse.json();
+    if (!geminiData.candidates || !geminiData.candidates[0]) {
+      console.error("Unexpected Gemini response structure:", JSON.stringify(geminiData));
+      throw new Error("Invalid response from Gemini AI");
+    }
+
     const resultText = geminiData.candidates[0].content.parts[0].text;
+    console.log("Gemini Raw Response:", resultText);
     
     // Clean potential markdown code blocks from LLM response
     const cleanedResult = resultText.replace(/```json|```/g, "").trim();
     const verification = JSON.parse(cleanedResult);
 
     if (!verification.valid) {
+      console.log("Submission rejected by AI:", verification.reason);
       return { 
         statusCode: 400, 
         body: JSON.stringify({ error: `Submission rejected by AI: ${verification.reason}` }) 
@@ -59,15 +73,19 @@ export const handler = async (event) => {
     }
 
     // 2. Fetch current queries.json from GitHub
+    console.log("Fetching current queries.json from GitHub...");
     const githubUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
     const ghGetResponse = await fetch(githubUrl, {
       headers: {
         Authorization: `token ${GITHUB_PAT}`,
         Accept: "application/vnd.github.v3+json",
+        "User-Agent": "Netlify-Function"
       }
     });
 
     if (!ghGetResponse.ok) {
+      const errorText = await ghGetResponse.text();
+      console.error("GitHub Fetch Error:", errorText);
       throw new Error(`Failed to fetch file from GitHub: ${ghGetResponse.statusText}`);
     }
 
@@ -87,12 +105,14 @@ export const handler = async (event) => {
     const encodedContent = Buffer.from(JSON.stringify(updatedContent, null, 2)).toString("base64");
 
     // 4. Update file on GitHub
+    console.log("Committing update to GitHub...");
     const ghPutResponse = await fetch(githubUrl, {
       method: "PUT",
       headers: {
         Authorization: `token ${GITHUB_PAT}`,
         Accept: "application/vnd.github.v3+json",
         "Content-Type": "application/json",
+        "User-Agent": "Netlify-Function"
       },
       body: JSON.stringify({
         message: `Add new student voice from ${handle}`,
@@ -103,9 +123,11 @@ export const handler = async (event) => {
 
     if (!ghPutResponse.ok) {
       const errorData = await ghPutResponse.json();
+      console.error("GitHub Update Error:", JSON.stringify(errorData));
       throw new Error(`Failed to update file on GitHub: ${errorData.message}`);
     }
 
+    console.log("Successfully added new voice!");
     return {
       statusCode: 200,
       body: JSON.stringify({ message: "Success" })
