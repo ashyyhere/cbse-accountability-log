@@ -327,7 +327,7 @@ function SiteHeader({ route, isDark, toggleDark }) {
           <div className="flex items-center gap-2">
             <button 
               onClick={toggleDark} 
-              className="md:hidden flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors"
               aria-label="Toggle Dark Mode"
             >
               {isDark ? <Sun size={14} /> : <Moon size={14} />}
@@ -358,13 +358,6 @@ function SiteHeader({ route, isDark, toggleDark }) {
               {item.label}
             </a>
           ))}
-          <button 
-            onClick={toggleDark} 
-            className="hidden md:flex ml-4 h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors shrink-0"
-            aria-label="Toggle Dark Mode"
-          >
-            {isDark ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
         </div>
       </nav>
     </header>
