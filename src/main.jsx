@@ -24,7 +24,7 @@ const routes = [
   { id: "home", label: "Home", href: "#/" },
   { id: "issues", label: "Key Issues", href: "#/issues" },
   { id: "results", label: "Results Issues", href: "#/results" },
-  { id: "queries", label: "Queries", href: "#/queries" },
+  { id: "voices", label: "Voices", href: "#/voices" },
   { id: "images", label: "Gallery", href: "#/images" },
   { id: "goats", label: "The Goats", href: "#/goats" },
   { id: "contribute", label: "Contribute", href: "https://github.com/ashyyhere/cbse-accountability-log" },
@@ -292,7 +292,7 @@ function App() {
         {route === "home" && <Hero />}
         {route === "issues" && <IssueOverview />}
         {route === "results" && <ResultsIssues />}
-        {route === "queries" && <QueriesPage />}
+        {route === "voices" && <VoicesPage />}
         {route === "images" && <GalleryPage />}
         {route === "goats" && <GoatsPage />}
         {route === "contribute" && <CallToAction />}
@@ -312,46 +312,82 @@ function getRouteFromHash() {
 }
 
 function SiteHeader({ route, isDark, toggleDark }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <header className="misty-blur sticky top-0 z-50 bg-white/70 dark:bg-slate-950/70 border-b border-transparent dark:border-slate-800/50 transition-colors duration-200">
-      <nav className="mx-auto flex max-w-5xl flex-col items-center justify-between px-6 py-6 md:flex-row md:px-8">
-        <div className="flex w-full justify-between items-center md:w-auto">
-          <a className="group flex items-center gap-4" href="#/">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#7dbefa]/10 p-1.5 transition-colors group-hover:bg-[#7dbefa]/20">      
+      <nav className="mx-auto max-w-5xl px-4 md:px-8">
+        <div className="flex h-16 md:h-20 items-center justify-between">
+          {/* Logo */}
+          <a className="group flex items-center gap-3 shrink-0" href="#/">
+            <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-[#7dbefa]/10 p-1.5 transition-colors group-hover:bg-[#7dbefa]/20">      
               <img className="h-full w-full object-contain opacity-50" src="/assets/cbse-logo.png" alt="CBSE" />
             </div>
-            <span className="font-display text-xs font-bold uppercase tracking-[0.3em] text-[#7dbefa]">Accountability Log</span>
+            <span className="font-display text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-[#7dbefa]">Accountability Log</span>
           </a>
-          <button 
-            onClick={toggleDark} 
-            className="md:hidden flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors"
-            aria-label="Toggle Dark Mode"
-          >
-            {isDark ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
-        </div>
-        <div className="mt-6 flex w-full max-w-full items-center gap-2 overflow-x-auto pb-2 hide-scrollbar md:mt-0 md:w-auto md:overflow-visible md:pb-0">
-          {routes.map((item) => (
-            <a
-              className={`shrink-0 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
-                route === item.id 
-                  ? "bg-[#7dbefa] text-white" 
-                  : "text-slate-400 hover:text-[#7dbefa] dark:hover:text-[#7dbefa]"
-              }`}
-              href={item.href}
-              key={item.id}
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-1 lg:gap-2">
+            {routes.map((item) => (
+              <a
+                className={`rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  route === item.id 
+                    ? "bg-[#7dbefa] text-white" 
+                    : "text-slate-400 hover:text-[#7dbefa]"
+                }`}
+                href={item.href}
+                key={item.id}
+              >
+                {item.label}
+              </a>
+            ))}
+            <button 
+              onClick={toggleDark} 
+              className="ml-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors shrink-0"
+              aria-label="Toggle Dark Mode"
             >
-              {item.label}
-            </a>
-          ))}
-          <button 
-            onClick={toggleDark} 
-            className="hidden md:flex ml-4 h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors shrink-0"
-            aria-label="Toggle Dark Mode"
-          >
-            {isDark ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
+              {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+          </div>
+
+          {/* Mobile Actions */}
+          <div className="flex items-center gap-2 md:hidden">
+            <button 
+              onClick={toggleDark} 
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors"
+              aria-label="Toggle Dark Mode"
+            >
+              {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400"
+              aria-label="Toggle Menu"
+            >
+              <MessageSquare size={14} />
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu - Collapsible */}
+        {isMenuOpen && (
+          <div className="md:hidden flex flex-wrap items-center justify-center gap-2 pb-6 pt-2">
+            {routes.map((item) => (
+              <a
+                className={`rounded-full px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest transition-all ${
+                  route === item.id 
+                    ? "bg-[#7dbefa] text-white" 
+                    : "text-slate-400 bg-slate-50 dark:bg-slate-900/50"
+                }`}
+                href={item.href}
+                key={item.id}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        )}
       </nav>
     </header>
   );
@@ -359,32 +395,32 @@ function SiteHeader({ route, isDark, toggleDark }) {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden pt-24 pb-20 md:pt-32 md:pb-40">
+    <section className="relative overflow-hidden pt-12 pb-16 md:pt-32 md:pb-40">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-slate-50/30 to-white dark:from-slate-950 dark:via-slate-900/30 dark:to-slate-950" />
       <div className="mx-auto max-w-5xl px-6 text-center md:px-8">
-        <div className="mb-10 inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] text-[#7dbefa]/60">
+        <div className="mb-8 md:mb-10 inline-flex items-center gap-3 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-[#7dbefa]/60">
           <Newspaper size={12} className="text-[#7dbefa]/40" />
           <span>Public Interest Audit</span>
         </div>
         
-        <h1 className="font-display text-4xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl md:text-7xl lg:leading-[1.1]">
-          Open records for <br/>
+        <h1 className="font-display text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl md:text-7xl lg:leading-[1.1]">
+          Open records for <br className="hidden sm:block"/>
           <span className="font-display font-bold italic text-[#7dbefa]">digital accountability</span>
         </h1>
         
-        <p className="mx-auto mt-12 max-w-xl text-sm leading-loose text-slate-400 sm:text-base">
+        <p className="mx-auto mt-8 md:mt-12 max-w-xl text-xs md:text-sm leading-relaxed md:leading-loose text-slate-400 sm:text-base">
           A transparent repository documenting institutional failures, security gaps, and procurement anomalies in the CBSE digital marking infrastructure.
         </p>
         
-        <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row md:mt-16 md:gap-6">
+        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row md:mt-16 md:gap-6">
           <a
-            className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#7dbefa] px-10 text-[10px] font-bold uppercase tracking-widest text-white transition-transform hover:scale-[1.02] active:scale-[0.98] sm:w-auto"
+            className="inline-flex h-11 md:h-12 w-full items-center justify-center rounded-full bg-[#7dbefa] px-10 text-[10px] font-bold uppercase tracking-widest text-white transition-transform hover:scale-[1.02] active:scale-[0.98] sm:w-auto"
             href="#/issues"
           >
             Explore the Log
           </a>
           <a
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-slate-100 dark:border-slate-800 px-10 text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-colors hover:border-[#7dbefa] hover:text-[#7dbefa] sm:w-auto"
+            className="inline-flex h-11 md:h-12 w-full items-center justify-center gap-2 rounded-full border border-slate-100 dark:border-slate-800 px-10 text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-colors hover:border-[#7dbefa] hover:text-[#7dbefa] sm:w-auto"
             href="https://github.com/ashyyhere/cbse-accountability-log"
             rel="noreferrer"
             target="_blank"
@@ -455,14 +491,50 @@ function ResultsIssues() {
   );
 }
 
-function QueriesPage() {
+function VoicesPage() {
   const [queries] = useState(queriesData);
+  const [form, setForm] = useState({ handle: "", text: "" });
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const response = await fetch("/.netlify/functions/submit-voice", {
+        method: "POST",
+        body: JSON.stringify(form),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus({ 
+          type: "success", 
+          message: "Thank you! Your voice has been verified and added to the log. It will appear here after the next site build (usually 1-2 minutes)." 
+        });
+        setForm({ handle: "", text: "" });
+      } else {
+        setStatus({ 
+          type: "error", 
+          message: data.error || "Something went wrong. Please try again." 
+        });
+      }
+    } catch (error) {
+      setStatus({ type: "error", message: "Failed to connect to the server." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-20 md:px-8 md:py-32">
       <div className="mb-16 text-center md:mb-24 md:text-left">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-300 dark:text-slate-600">Student Voices</p>
-        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Twitter Curation</h2>
+        <h2 className="font-display mt-6 text-3xl font-light tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">Grievance Registry</h2>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -486,6 +558,57 @@ function QueriesPage() {
             </p>
           </article>
         ))}
+      </div>
+
+      {/* Submission Form - Moved below and made compact */}
+      <div className="mt-24 mx-auto max-w-2xl rounded-[2rem] bg-slate-50 dark:bg-slate-900/30 p-8 border border-slate-100 dark:border-slate-800/50 md:p-10">
+        <div className="mb-8">
+          <h3 className="font-display text-xl font-medium text-slate-900 dark:text-slate-100">Submit Your Voice</h3>
+          <p className="mt-2 text-xs text-slate-400">Verified reports are added to the public log after AI moderation.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="handle" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Name or X Handle</label>
+            <input
+              type="text"
+              id="handle"
+              required
+              placeholder="@username or Name"
+              className="w-full rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-6 py-3.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#7dbefa] transition-colors"
+              value={form.handle}
+              onChange={(e) => setForm({ ...form, handle: e.target.value })}
+            />
+          </div>
+          <div>
+            <label htmlFor="message" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Your Issue / Report</label>
+            <textarea
+              id="message"
+              required
+              rows="3"
+              placeholder="Describe the issue you faced..."
+              className="w-full rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-6 py-3.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#7dbefa] transition-colors"
+              value={form.text}
+              onChange={(e) => setForm({ ...form, text: e.target.value })}
+            ></textarea>
+          </div>
+          
+          <div className="flex flex-col gap-4">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#7dbefa] px-8 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
+            >
+              {isSubmitting ? "Verifying..." : "Submit Report"}
+            </button>
+            
+            {status.message && (
+              <p className={`text-center text-[10px] font-medium ${status.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+                {status.message}
+              </p>
+            )}
+          </div>
+        </form>
       </div>
     </section>
   );
