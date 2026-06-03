@@ -316,15 +316,42 @@ function SiteHeader({ route, isDark, toggleDark }) {
 
   return (
     <header className="misty-blur sticky top-0 z-50 bg-white/70 dark:bg-slate-950/70 border-b border-transparent dark:border-slate-800/50 transition-colors duration-200">
-      <nav className="mx-auto flex max-w-5xl flex-col items-center justify-between px-4 py-4 md:flex-row md:px-8 md:py-6">
-        <div className="flex w-full justify-between items-center md:w-auto">
-          <a className="group flex items-center gap-3 md:gap-4" href="#/">
+      <nav className="mx-auto max-w-5xl px-4 md:px-8">
+        <div className="flex h-16 md:h-20 items-center justify-between">
+          {/* Logo */}
+          <a className="group flex items-center gap-3 shrink-0" href="#/">
             <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-[#7dbefa]/10 p-1.5 transition-colors group-hover:bg-[#7dbefa]/20">      
               <img className="h-full w-full object-contain opacity-50" src="/assets/cbse-logo.png" alt="CBSE" />
             </div>
             <span className="font-display text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-[#7dbefa]">Accountability Log</span>
           </a>
-          <div className="flex items-center gap-2">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-1 lg:gap-2">
+            {routes.map((item) => (
+              <a
+                className={`rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  route === item.id 
+                    ? "bg-[#7dbefa] text-white" 
+                    : "text-slate-400 hover:text-[#7dbefa]"
+                }`}
+                href={item.href}
+                key={item.id}
+              >
+                {item.label}
+              </a>
+            ))}
+            <button 
+              onClick={toggleDark} 
+              className="ml-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors shrink-0"
+              aria-label="Toggle Dark Mode"
+            >
+              {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+          </div>
+
+          {/* Mobile Actions */}
+          <div className="flex items-center gap-2 md:hidden">
             <button 
               onClick={toggleDark} 
               className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#7dbefa] transition-colors"
@@ -334,31 +361,33 @@ function SiteHeader({ route, isDark, toggleDark }) {
             </button>
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400"
               aria-label="Toggle Menu"
             >
               <MessageSquare size={14} />
             </button>
           </div>
         </div>
-        
+
         {/* Mobile Menu - Collapsible */}
-        <div className={`${isMenuOpen ? 'flex' : 'hidden md:flex'} mt-4 w-full flex-wrap items-center justify-center gap-2 overflow-x-auto pb-2 hide-scrollbar md:mt-0 md:w-auto md:overflow-visible md:pb-0`}>
-          {routes.map((item) => (
-            <a
-              className={`shrink-0 rounded-full px-4 py-2.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest transition-all ${
-                route === item.id 
-                  ? "bg-[#7dbefa] text-white" 
-                  : "text-slate-400 hover:text-[#7dbefa] dark:hover:text-[#7dbefa] bg-slate-50 md:bg-transparent dark:bg-slate-900/50 md:dark:bg-transparent"
-              }`}
-              href={item.href}
-              key={item.id}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {item.label}
-            </a>
-          ))}
-        </div>
+        {isMenuOpen && (
+          <div className="md:hidden flex flex-wrap items-center justify-center gap-2 pb-6 pt-2">
+            {routes.map((item) => (
+              <a
+                className={`rounded-full px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest transition-all ${
+                  route === item.id 
+                    ? "bg-[#7dbefa] text-white" 
+                    : "text-slate-400 bg-slate-50 dark:bg-slate-900/50"
+                }`}
+                href={item.href}
+                key={item.id}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        )}
       </nav>
     </header>
   );
