@@ -25,7 +25,7 @@ export const handler = async (event) => {
   try {
     // 1. Verify with Gemini LLM
     console.log("Starting Gemini verification for:", handle);
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     
     const prompt = `You are a moderator for a site tracking institutional failures in CBSE digital marking (OSM) and re-evaluation. 
     Analyze the following user-submitted message and determine if it is a relevant, valid complaint, issue, or report regarding CBSE evaluation, marking quality, scan issues, or security vulnerabilities in their systems.
