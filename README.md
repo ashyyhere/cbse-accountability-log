@@ -19,3 +19,18 @@ The goal is to create a traceable archive of cases that helps hold the CBSE OSM 
 - Reviewers and students raising concerns about OSM evaluation
 
 If you want to contribute, open an issue or submit a pull request with evidence-backed reports and anonymized documentation.
+
+## Recent Changes
+
+### Latest Commits
+- **Automated tweet sync**: Implemented automated X (Twitter) posting integration to share accountability updates every 4 hours
+- **Voice submission feature**: Added Netlify function for voice-based case submissions, allowing users to report issues via audio
+- **Frontend build optimization**: Configured Vite with TailwindCSS for responsive, optimized site rendering
+- **Data collection pipeline**: Python script for automated tweet fetching and verification from X topics
+
+## Tech Stack
+- **Frontend**: React + Vite + Tailwind CSS
+- **Backend**: Netlify Functions
+- **Data Processing**: Python (requests, ntscraper)
+- **CI/CD**: GitHub Actions with automated tweet fetching and deployment
+- **Hosting**: Netlify
